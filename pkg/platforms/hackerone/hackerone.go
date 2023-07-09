@@ -103,8 +103,7 @@ func getProgramScope(authorization string, id string, bbpOnly bool, categories [
 		utils.Log.Fatal("Could not retrieve data for id ", id, " with status ", lastStatus)
 	}
 
-	//pData.Url = "https://hackerone.com/" + id
-	pData.Url = id
+	pData.Url = "https://hackerone.com/" + id
 
 	var program Program
 
@@ -137,7 +136,7 @@ func getProgramScope(authorization string, id string, bbpOnly bool, categories [
 			if program.Relationships.StructuredScopes.Data[i].Attributes.EligibleForSubmission {
 				if !bbpOnly || (bbpOnly && program.Relationships.StructuredScopes.Data[i].Attributes.EligibleForBounty) {
 					if program.Relationships.StructuredScopes.Data[i].Attributes.AssetType == "DOMAIN" || program.Relationships.StructuredScopes.Data[i].Attributes.AssetType == "URL" || program.Relationships.StructuredScopes.Data[i].Attributes.AssetType == "OTHER" || program.Relationships.StructuredScopes.Data[i].Attributes.AssetType == "WILDCARD" {
-						for _, match := range r.FindAllString(program.Relationships.StructuredScopes.Data[i].Attributes.AssetIdentifier, -1) {
+						for _, match := range r.FindAllString(strings.ToLower(program.Relationships.StructuredScopes.Data[i].Attributes.AssetIdentifier), -1) {
 							_, ok := targets[match]
 							if !ok {
 								pData.InScope = append(pData.InScope, scope.ScopeElement{
@@ -148,7 +147,7 @@ func getProgramScope(authorization string, id string, bbpOnly bool, categories [
 								targets[match] = struct{}{}
 							}
 						}
-						for _, match := range r.FindAllString(program.Relationships.StructuredScopes.Data[i].Attributes.Instruction, -1) {
+						for _, match := range r.FindAllString(strings.ToLower(program.Relationships.StructuredScopes.Data[i].Attributes.Instruction), -1) {
 							_, ok := targets[match]
 							if !ok {
 								pData.InScope = append(pData.InScope, scope.ScopeElement{
