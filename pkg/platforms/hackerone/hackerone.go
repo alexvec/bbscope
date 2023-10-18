@@ -103,7 +103,7 @@ func getProgramScope(authorization string, id string, bbpOnly bool, categories [
 		utils.Log.Fatal("Could not retrieve data for id ", id, " with status ", lastStatus)
 	}
 
-	pData.Url = "https://hackerone.com/" + id
+	pData.Url = id + "_h1"
 
 	var program Program
 
