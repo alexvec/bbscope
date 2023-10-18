@@ -32,3 +32,5 @@ require (
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
+
+replace github.com/sw33tLie/bbscope v0.0.0-20231002192102-fe571655b270 => github.com/alexvec/bbscope v0.0.0-20231018212810-8cacb0a6fb5a
