@@ -259,7 +259,7 @@ func GetProgramScope(handle string, categories string, token string) (pData scop
 
 		var program Program
 
-		err = json.Unmarshal([]byte(res.BodyString), &program)
+		err = json.Unmarshal([]byte(res2.BodyString), &program)
 
 		if err != nil {
 			utils.Log.Fatal("Could not parse program for handle  ", handle, " with status ", res2.StatusCode)
