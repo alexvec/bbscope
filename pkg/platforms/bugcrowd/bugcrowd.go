@@ -175,7 +175,7 @@ func GetProgramHandles(sessionToken string, bbpOnly bool, pvtOnly bool) []string
 }
 
 func GetProgramScope(handle string, categories string, token string) (pData scope.ProgramData) {
-	pData.Url = handle + "_bc"
+	pData.Url = "https://bugcrowd.com" + handle
 
 	var res, res2 *whttp.WHTTPRes
 	var err error
@@ -206,6 +206,8 @@ func GetProgramScope(handle string, categories string, token string) (pData scop
 			time.Sleep(RATE_LIMIT_SLEEP_SECONDS * time.Second)
 		}
 	}
+
+	pData.Url = handle + "_bc"
 
 	// Times @arcwhite broke our code: #3 and counting :D
 
