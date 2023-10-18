@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/alexvec/bbscope/internal/utils"
+	"github.com/alexvec/bbscope/pkg/platforms/bugcrowd"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/sw33tLie/bbscope/internal/utils"
-	"github.com/sw33tLie/bbscope/pkg/platforms/bugcrowd"
 )
 
 // bcCmd represents the bc command

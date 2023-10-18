@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexvec/bbscope/internal/utils"
 	"github.com/spf13/cobra"
-	"github.com/sw33tLie/bbscope/internal/utils"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -19,7 +19,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "bbscope",
 	Short: "Grab scope from HackerOne, Bugcrowd, Intigriti and YesWeHack",
-	Long:  `The ultimate scope gathering tool for HackerOne, Bugcrowd, Intigriti and YesWeHack by sw33tLie`,
+	Long:  `The ultimate scope gathering tool for HackerOne, Bugcrowd, Intigriti and YesWeHack by alexvec`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
