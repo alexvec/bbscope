@@ -2,9 +2,11 @@ package bugcrowd
 
 import (
 	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -22,6 +24,17 @@ const (
 	BUGCROWD_LOGIN_PAGE      = "https://bugcrowd.com/user/sign_in"
 	RATE_LIMIT_SLEEP_SECONDS = 5
 )
+
+type Program struct {
+	Targets []struct {
+		ID          string `json:"id,omitempty"`
+		Name        string `json:"name,omitempty"`
+		Description string `json:"description,omitempty"`
+		Category    string `json:"category,omitempty"`
+		URI         string `json:"uri,omitempty"`
+		IPAddress   string `json:"ipAddress,omitempty"`
+	} `json:"targets,omitempty"`
+}
 
 func Login(email string, password string) string {
 	// Send GET to https://bugcrowd.com/user/sign_in
@@ -175,10 +188,13 @@ func GetProgramHandles(sessionToken string, bbpOnly bool, pvtOnly bool) []string
 }
 
 func GetProgramScope(handle string, categories string, token string) (pData scope.ProgramData) {
+	r, err := regexp.Compile("(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]")
+	if err != nil {
+		utils.Log.Fatal("Could not create regex pattern for handle ", handle)
+	}
 	pData.Url = "https://bugcrowd.com" + handle
 
 	var res, res2 *whttp.WHTTPRes
-	var err error
 
 	client := &http.Client{}
 
@@ -207,11 +223,9 @@ func GetProgramScope(handle string, categories string, token string) (pData scop
 		}
 	}
 
-	pData.Url = handle + "_bc"
-
 	// Times @arcwhite broke our code: #3 and counting :D
 
-	noScopeTable := true
+	//noScopeTable := true
 	for _, scopeTableURL := range gjson.Get(string(res.BodyString), "groups.#(in_scope==true)#.targets_url").Array() {
 
 		// Send HTTP request for each table
@@ -241,36 +255,57 @@ func GetProgramScope(handle string, categories string, token string) (pData scop
 			}
 		}
 
-		chunkData := gjson.GetMany(string(res2.BodyString), "targets.#.name", "targets.#.category", "targets.#.description")
-		for i := 0; i < len(chunkData[0].Array()); i++ {
-			var currentTarget struct {
-				line     string
-				category string
-			}
-			currentTarget.line = strings.TrimSpace(chunkData[0].Array()[i].String())
-			currentTarget.category = chunkData[1].Array()[i].String()
+		pData.Url = handle + "_bc"
 
-			if categories != "all" {
-				catMatches := false
-				if currentTarget.category == GetCategories(categories)[0] {
-					catMatches = true
-				}
+		var program Program
 
-				if catMatches {
-					pData.InScope = append(pData.InScope, scope.ScopeElement{Target: currentTarget.line, Description: chunkData[2].Array()[i].String(), Category: currentTarget.category})
-				}
+		err = json.Unmarshal([]byte(res.BodyString), &program)
 
-			} else {
-				pData.InScope = append(pData.InScope, scope.ScopeElement{Target: currentTarget.line, Description: chunkData[2].Array()[i].String(), Category: currentTarget.category})
-			}
-
+		if err != nil {
+			utils.Log.Fatal("Could not parse program for handle  ", handle, " with status ", res2.StatusCode)
 		}
-		noScopeTable = false
+
+		targets := make(map[string]struct{})
+		for _, target := range program.Targets {
+			catMatches := categories == "all"
+			for _, cat := range GetCategories(categories) {
+				if cat == target.Category {
+					catMatches = true
+					break
+				}
+			}
+
+			if catMatches {
+				for _, match := range r.FindAllString(strings.ToLower(target.Name), -1) {
+					_, ok := targets[match]
+					if !ok {
+						pData.InScope = append(pData.InScope, scope.ScopeElement{Target: match, Description: target.Description, Category: target.Category})
+						targets[match] = struct{}{}
+					}
+				}
+				for _, match := range r.FindAllString(strings.ToLower(target.Description), -1) {
+					_, ok := targets[match]
+					if !ok {
+						pData.InScope = append(pData.InScope, scope.ScopeElement{Target: match, Description: target.Description, Category: target.Category})
+						targets[match] = struct{}{}
+					}
+				}
+				for _, match := range r.FindAllString(strings.ToLower(target.URI), -1) {
+					_, ok := targets[match]
+					if !ok {
+						pData.InScope = append(pData.InScope, scope.ScopeElement{Target: match, Description: target.Description, Category: target.Category})
+						targets[match] = struct{}{}
+					}
+				}
+			}
+		}
 	}
 
-	if noScopeTable {
-		pData.InScope = append(pData.InScope, scope.ScopeElement{Target: "NO_IN_SCOPE_TABLE", Description: "", Category: ""})
-	}
+	/*
+		if noScopeTable {
+			pData.InScope = append(pData.InScope, scope.ScopeElement{Target: "NO_IN_SCOPE_TABLE", Description: "", Category: ""})
+		}
+	*/
 
 	return pData
 }
@@ -284,6 +319,7 @@ func GetCategories(input string) []string {
 		"apple":    {"ios"},
 		"other":    {"other"},
 		"hardware": {"hardware"},
+		"allinfra": {"website", "api", "other"},
 	}
 
 	selectedCategory, ok := categories[strings.ToLower(input)]
