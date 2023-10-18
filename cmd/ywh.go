@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/alexvec/bbscope/pkg/platforms/yeswehack"
 	"github.com/spf13/cobra"
+	"github.com/sw33tLie/bbscope/pkg/platforms/yeswehack"
 )
 
 // ywhCmd represents the ywh command

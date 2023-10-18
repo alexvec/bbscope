@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/alexvec/bbscope/pkg/platforms/immunefi"
 	"github.com/spf13/cobra"
+	"github.com/sw33tLie/bbscope/pkg/platforms/immunefi"
 )
 
 // immunefiCmd represents the immunefi command

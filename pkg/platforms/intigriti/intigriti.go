@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/alexvec/bbscope/pkg/scope"
-	"github.com/alexvec/bbscope/pkg/whttp"
+	"github.com/sw33tLie/bbscope/pkg/scope"
+	"github.com/sw33tLie/bbscope/pkg/whttp"
 	"github.com/tidwall/gjson"
 )
 
