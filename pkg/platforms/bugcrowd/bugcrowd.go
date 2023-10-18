@@ -255,7 +255,7 @@ func GetProgramScope(handle string, categories string, token string) (pData scop
 			}
 		}
 
-		pData.Url = handle + "_bc"
+		pData.Url = strings.TrimSuffix(handle, "/") + "_bc"
 
 		var program Program
 
